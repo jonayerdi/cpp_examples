@@ -1,5 +1,4 @@
 #include <iostream>
-#include <iterator>
 
 using namespace std;
 
@@ -38,7 +37,7 @@ public:
         iterator(LinkedListNode<T> *value) {
             ptr = value;
         }
-        iterator() : iterator(nullptr) { }
+        iterator() : iterator{nullptr} { }
         iterator(const iterator& iter) {
             ptr = iter.ptr;
         }

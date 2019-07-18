@@ -13,13 +13,13 @@ class GuessWord
         unordered_set<char> guessed;
         unsigned attempts;
     public:
-        GuessWord(const string word, unsigned attempts) : word(word), letters(), guessed(), attempts(attempts)
+        GuessWord(const string word, unsigned attempts) : word{word}, letters{}, guessed{}, attempts{attempts}
         {
             for(char letter : word) {
                 letters.insert(letter);
             }
         }
-        GuessWord(const string word) : GuessWord(word, 3)
+        GuessWord(const string word) : GuessWord{word, 3}
         {}
         friend ostream& operator<<(ostream& os, const GuessWord& obj) {
             for(char letter : obj.word) {
