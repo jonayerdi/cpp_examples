@@ -11,7 +11,7 @@ class Vector
         size_t count;
     public:
         // Iterator implementation
-        class iterator : public std::iterator<std::forward_iterator_tag, T> { 
+        class iterator : public std::iterator<std::random_access_iterator_tag, T> { 
         public:
             typedef ptrdiff_t difference_type;
             typedef size_t size_type;
