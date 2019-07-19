@@ -1,6 +1,5 @@
 #include <iostream>
-#include <exception>
-#include <cstring>
+#include <algorithm>
 
 template <class T, class A = std::allocator<T>>
 class Vector
@@ -15,15 +14,16 @@ class Vector
         class iterator : public std::iterator<std::forward_iterator_tag, T> { 
         public:
             typedef ptrdiff_t difference_type;
+            typedef size_t size_type;
             typedef T value_type;
             typedef T& reference;
             typedef T* pointer;
             typedef std::random_access_iterator_tag iterator_category;
 
             T *elements;
-            size_t index;
+            size_type index;
 
-            iterator(T *elements, size_t index) {
+            iterator(T *elements, size_type index) {
                 this->elements = elements;
                 this->index = index;
             }
@@ -38,6 +38,7 @@ class Vector
             iterator& operator=(const iterator& iter) {
                 elements = iter.elements;
                 index = iter.index;
+                return *this;
             }
             bool operator==(const iterator& iter) const {
                 return index == iter.index;
@@ -62,17 +63,26 @@ class Vector
                 return *this;
             }
             // RandomAccessIterator
-            iterator& operator+(size_t n) const {
+            iterator operator+(size_type n) const {
                 return iterator {elements, index + n};
             }
-            iterator& operator-(size_t n) const {
+            iterator operator-(size_type n) const {
                 return iterator {elements, index - n};
             }
-            iterator& operator+=(size_t n) {
+            friend iterator operator+(size_type n, const iterator& iter) {
+                return iterator {iter.elements, iter.index + n};
+            }
+            friend iterator operator-(size_type n, const iterator& iter) {
+                return iterator {iter.elements, iter.index - n};
+            }
+            difference_type operator-(iterator iter) const {
+                return index - iter.index;
+            }
+            iterator& operator+=(size_type n) {
                 index += n;
                 return *this;
             }
-            iterator& operator-=(size_t n) {
+            iterator& operator-=(size_type n) {
                 index -= n;
                 return *this;
             }
@@ -88,7 +98,7 @@ class Vector
             bool operator>=(const iterator& iter) const {
                 return index >= iter.index;
             }
-            reference operator[](size_t idx) const {
+            reference operator[](size_type idx) const {
                 return elements[idx];
             }
         };
@@ -115,12 +125,7 @@ class Vector
             capacity = init.size();
             count = init.size();
             elements = alloc.allocate(capacity);
-            size_t i = 0;
-            for(T e : init) {
-                // Does not run assignment operator=
-                memcpy(&elements[i++], &e, sizeof(T));
-            }
-            // Should use std::copy_n() instead
+            std::copy_n(init.begin(), count, this->begin());
         }
         // Copy constructor
         Vector(const Vector<T>& vec) {
@@ -128,8 +133,9 @@ class Vector
             count = vec.count;
             elements = alloc.allocate(capacity);
             // Does not run assignment operator=
-            memcpy(elements, vec.elements, count * sizeof(T));
+            // memcpy(elements, vec.elements, count * sizeof(T));
             // Should use std::copy_n() instead
+            std::copy_n(vec.begin(), count, this->begin());
         }
         // Move constructor
         Vector(Vector<T>&& vec) {
@@ -173,12 +179,9 @@ class Vector
 
 int main() {
     Vector<int> v1 {1,2,3,4,5,6,7,8,9,10,11,12};
-    for(int e : v1) {
-        std::cout << e << std::endl;
-    }
     // auto v2 = v1; // Copy assignment
     // auto v2 = std::move(v1); // Move assignment
-    // Vector<int> v2 {v1}; // Copy constructor
+    //Vector<int> v2 {v1}; // Copy constructor
     Vector<int> v2 {std::move(v1)}; // Move constructor
     for(int e : v2) {
         std::cout << e << std::endl;
