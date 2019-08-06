@@ -14,18 +14,18 @@ private:
 public:
     semaphore(size_t count) : count_(count){}
     void notify(size_t count) {
-        std::lock_guard<decltype(mutex_)> lock(mutex_);
+        std::lock_guard<decltype(mutex_)> lock {mutex_};
         count_ += count;
         condition_.notify_all();
     }
     void wait(size_t count) {
-        std::unique_lock<decltype(mutex_)> lock(mutex_);
+        std::unique_lock<decltype(mutex_)> lock {mutex_};
         while(count_ < count) // Handle spurious wake-ups.
             condition_.wait(lock);
         count_ -= count;
     }
     bool try_wait(size_t count) {
-        std::lock_guard<decltype(mutex_)> lock(mutex_);
+        std::lock_guard<decltype(mutex_)> lock {mutex_};
         if(count_ >= count) {
             count_ -= count;
             return true;
